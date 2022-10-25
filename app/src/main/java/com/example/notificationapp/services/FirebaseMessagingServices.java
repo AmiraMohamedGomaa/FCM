@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -22,25 +23,37 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
 public class FirebaseMessagingServices extends FirebaseMessagingService {
+    private static final String TAG = "firebase";
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         // TODO(developer): Handle FCM messages here.
 
+        if (remoteMessage.getData().size() > 0) {
+            Log.d(TAG, "Message data payload: " + remoteMessage.getData());
+
+        }
+
         // Check if message contains a notification payload.
         if (remoteMessage.getNotification() != null) {
-        }
-        sendNotification(remoteMessage.getFrom(), remoteMessage.getNotification().getBody());
+            String title = remoteMessage.getNotification().getTitle(); //get title
+            String message = remoteMessage.getNotification().getBody(); //get message
 
+            Log.d(TAG, "Message Notification Title: " + title);
+            Log.d(TAG, "Message Notification Body: " + message);
+
+            sendNotification(title, message);
+        }
 
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    private void sendNotification(String from, String body) {
+    private void sendNotification(String title, String body) {
 
 
         Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra("notification",body);
+
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
                 PendingIntent.FLAG_IMMUTABLE);
@@ -50,6 +63,7 @@ public class FirebaseMessagingServices extends FirebaseMessagingService {
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this, channelId)
                         .setContentTitle("Unilever")
+                        .setContentTitle(title)
                         .setContentText(body)
                         .setSmallIcon(R.drawable.ic_stat_name)
                         .setAutoCancel(true)
